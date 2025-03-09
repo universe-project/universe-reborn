@@ -38,7 +38,7 @@ CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // "standard" scrypt target limit
 CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 16);
 
-unsigned int nTargetSpacing = 1 * 60; // 1 minute
+unsigned int nTargetSpacing = 10 * 60; // 1 minute
 unsigned int nStakeMinAge = 8 * 60 * 60;
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
@@ -1007,14 +1007,12 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan)
 // miner's coin base reward
 int64_t GetProofOfWorkReward(int64_t nFees)
 {
-    
-    int64_t nSubsidy = 240 * COIN;
+    int64_t nSubsidy = 1 * COIN; // Награда за блок до 1000 блока
 
-    if(nBestHeight == 0)
-        nSubsidy = 11200000 * COIN;
-
-    if (fDebug && GetBoolArg("-printcreation"))
-        printf("GetProofOfWorkReward() : create=%s nSubsidy=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nSubsidy);
+    if (nBestHeight > 1000)
+    {
+        nSubsidy = 0; // После 1000 блока награда за PoW блоки может быть отключена
+    }
 
     return nSubsidy + nFees;
 }
@@ -1022,15 +1020,11 @@ int64_t GetProofOfWorkReward(int64_t nFees)
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees)
 {
-    int64_t nSubsidy = nCoinAge * GetCoinYearReward(nBestHeight) * 33 / (365 * 33 + 8);
-
-    if (fDebug && GetBoolArg("-printcreation"))
-        printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
-
+    int64_t nSubsidy = 5 * COIN; // Фиксированная награда в 5 монет
     return nSubsidy + nFees;
 }
 
-static const int64_t nTargetTimespan = 16 * 60;  // 16 mins
+static const int64_t nTargetTimespan = 20 * 60;  // 16 mins
 
 //
 // maximum nBits value could possible be required nTime after
